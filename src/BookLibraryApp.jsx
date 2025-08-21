@@ -54,6 +54,20 @@ const BookLibraryApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('');
+    //  Fetch books from backend instead of hardcoding
+  const fetchBooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/admin/books", { withCredentials: true });
+      setBooks(res.data);
+      setFilteredBooks(res.data); // default filtered view
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
   const currentUser = { id: 1, name: "John Doe", role: "user" };
   useEffect(() => {
@@ -63,13 +77,15 @@ const BookLibraryApp = () => {
 
   // Apply filters when filter values change
   useEffect(() => {
-    let filtered = books.filter(book => {
-      const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          book.author.toLowerCase().includes(searchTerm.toLowerCase());
+    let filtered = books.filter((book) => {
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesGenre = !genreFilter || book.genre === genreFilter;
-      const matchesAvailability = !availabilityFilter || 
-        (availabilityFilter === 'available' && book.available_copies > 0) ||
-        (availabilityFilter === 'unavailable' && book.available_copies === 0);
+      const matchesAvailability =
+        !availabilityFilter ||
+        (availabilityFilter === "available" && book.available_copies > 0) ||
+        (availabilityFilter === "unavailable" && book.available_copies === 0);
 
       return matchesSearch && matchesGenre && matchesAvailability;
     });

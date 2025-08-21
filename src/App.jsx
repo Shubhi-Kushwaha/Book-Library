@@ -3,7 +3,7 @@ import HomePage from "./pages/HomePage";
 import Login from "./pages/LoginPage";
 import Signup from "./pages/SignupPage"; 
 import AdminDashboard from "./pages/AdminDashboard";
-import Navbar from "./components/Navbar"; // ✅ import navbar
+import Navbar from "./components/Navbar"; 
 
 export default function App() {
   return (
