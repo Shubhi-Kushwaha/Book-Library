@@ -11,7 +11,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false); // ✅ New state for admin
+  const [isAdmin, setIsAdmin] = useState(false); // New state for admin
 
   const navigate = useNavigate();
 
@@ -205,8 +205,7 @@ export default function SignupPage() {
                   </div>
                 </div>
               </div>
-              {/* Right half (optional) */}
-              <div className="hidden lg:block lg:w-1/2 bg-gray-100"></div>
+              
             </div>
           </div>
         </div>

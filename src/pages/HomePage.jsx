@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserCircle } from "lucide-react";
-import AuthModal from "../components/AuthModal";
+import LoginPage from "./LoginPage";
 import BookLibraryApp from "../BookLibraryApp"; // make sure the path is correct
 
 export default function HomePage() {
@@ -19,21 +19,8 @@ export default function HomePage() {
           "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 10%, #8a8048 90%, #000 100%)",
       }}
     >
-      {/* Navbar */}
-      <header className="flex items-center justify-between px-6 py-4 sticky top-0 z-40">
-        <h1 className="text-xl font-bold text-white">Book Library</h1>
-
-        {/* Profile Icon */}
-        <button onClick={() => setShowAuth(true)}>
-          <UserCircle
-            className={`w-8 h-8 ${
-              (isHomePage && !isScrolled) || isAuthPage
-                ? "text-white hover:text-gray-200"
-                : "text-yellow-400 hover:text-yellow-300"
-            }`}
-          />
-        </button>
-      </header>
+    
+      
 
       {/* Main Content: Book Library System */}
       <main className="flex-1">
