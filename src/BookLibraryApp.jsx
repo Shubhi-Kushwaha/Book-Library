@@ -1,9 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Book, User, ShoppingBag, X, Plus, Minus, Check, Trash2, Info, BookOpen, Tag, Copy, Ban, Undo } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Search,
+  Book,
+  User,
+  ShoppingBag,
+  X,
+  Plus,
+  Minus,
+  Check,
+  Trash2,
+  Info,
+  BookOpen,
+  Tag,
+  Copy,
+  Ban,
+  Undo,
+} from "lucide-react";
 
 const BookLibraryApp = () => {
-  // Sample book data with 3 default books
-  const [books] = useState([
+  //  Books state (can be updated)
+  const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
+  const [myBag, setMyBag] = useState([]);
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [showBookModal, setShowBookModal] = useState(false);
+  const [showBagModal, setShowBagModal] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [genreFilter, setGenreFilter] = useState("");
+  const [availabilityFilter, setAvailabilityFilter] = useState("");
+
+  //  Fetch books from backend
+  const fetchBooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/admin/books", {
+        withCredentials: true,
+      });
+
+      // If backend returns books, use them, otherwise fallback to defaults
+      if (res.data && res.data.length > 0) {
+        setBooks(res.data);
+        setFilteredBooks(res.data);
+      } else {
+        setBooks(defaultBooks);
+        setFilteredBooks(defaultBooks);
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      // fallback to defaults if backend fails
+      setBooks(defaultBooks);
+      setFilteredBooks(defaultBooks);
+    }
+  };
+
+  //  3 Default books if backend empty
+  const defaultBooks = [
     {
       id: 1,
       title: "The Great Gatsby",
@@ -11,10 +66,11 @@ const BookLibraryApp = () => {
       genre: "Fiction",
       total_copies: 5,
       available_copies: 3,
-      description: "A classic American novel set in the Jazz Age, following the mysterious Jay Gatsby and his obsession with Daisy Buchanan. This masterpiece explores themes of wealth, love, idealism, and moral decay in America during the Roaring Twenties.",
+      description:
+        "A classic American novel set in the Jazz Age, following the mysterious Jay Gatsby and his obsession with Daisy Buchanan.",
       isbn: "978-0-7432-7356-5",
       published_year: 1925,
-      cover_color: "from-emerald-400 to-cyan-400"
+      cover_color: "from-emerald-400 to-cyan-400",
     },
     {
       id: 2,
@@ -23,10 +79,11 @@ const BookLibraryApp = () => {
       genre: "Fiction",
       total_copies: 4,
       available_copies: 0,
-      description: "A gripping tale of racial injustice and childhood innocence in the American South during the 1930s. Through the eyes of Scout Finch, this powerful story explores themes of morality, prejudice, and the loss of innocence.",
+      description:
+        "A gripping tale of racial injustice and childhood innocence in the American South during the 1930s.",
       isbn: "978-0-06-112008-4",
       published_year: 1960,
-      cover_color: "from-orange-400 to-rose-400"
+      cover_color: "from-orange-400 to-rose-400",
     },
     {
       id: 3,
@@ -35,47 +92,32 @@ const BookLibraryApp = () => {
       genre: "Science Fiction",
       total_copies: 6,
       available_copies: 2,
-      description: "A dystopian social science fiction novel about totalitarian control and surveillance. Set in a world where Big Brother watches everything, this prophetic work explores themes of government control, truth, and individual freedom.",
+      description:
+        "A dystopian social science fiction novel about totalitarian control and surveillance.",
       isbn: "978-0-452-28423-4",
       published_year: 1949,
-      cover_color: "from-purple-400 to-pink-400"
-    }
-  ]);
-
-  const [filteredBooks, setFilteredBooks] = useState(books);
-  const [myBag, setMyBag] = useState([]);
-  const [borrowedBooks, setBorrowedBooks] = useState([]);
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [showBookModal, setShowBookModal] = useState(false);
-  const [showBagModal, setShowBagModal] = useState(false);
-  const [notification, setNotification] = useState(null);
-  
-  // Filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [genreFilter, setGenreFilter] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState('');
-    //  Fetch books from backend instead of hardcoding
-  const fetchBooks = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/admin/books", { withCredentials: true });
-      setBooks(res.data);
-      setFilteredBooks(res.data); // default filtered view
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
+      cover_color: "from-purple-400 to-pink-400",
+    },
+  ];
 
   useEffect(() => {
     fetchBooks();
   }, []);
 
   const currentUser = { id: 1, name: "John Doe", role: "user" };
+
   useEffect(() => {
     window.myBagCount = myBag.length;
     window.dispatchEvent(new Event("bag-updated"));
   }, [myBag]);
+  
+  useEffect(() => {
+  const openBag = () => setShowBagModal(true);
+  window.addEventListener("open-bag", openBag);
+  return () => window.removeEventListener("open-bag", openBag);
+}, []);
 
-  // Apply filters when filter values change
+  //  Apply filters
   useEffect(() => {
     let filtered = books.filter((book) => {
       const matchesSearch =
@@ -92,21 +134,21 @@ const BookLibraryApp = () => {
     setFilteredBooks(filtered);
   }, [searchTerm, genreFilter, availabilityFilter, books]);
 
-  const showNotification = (message, type = 'success') => {
+  const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const isBookInBag = (bookId) => {
-    return myBag.some(book => book.id === bookId);
+    return myBag.some((book) => book.id === bookId);
   };
 
   const isBookBorrowed = (bookId) => {
-    return borrowedBooks.some(book => book.id === bookId);
+    return borrowedBooks.some((book) => book.id === bookId);
   };
 
   const addToBag = (bookId) => {
-    const book = books.find(b => b.id === bookId);
+    const book = books.find((b) => b.id === bookId);
     if (book && !isBookInBag(bookId)) {
       setMyBag([...myBag, book]);
       showNotification(`"${book.title}" added to your bag!`);
@@ -114,35 +156,41 @@ const BookLibraryApp = () => {
   };
 
   const removeFromBag = (bookId) => {
-    const book = books.find(b => b.id === bookId);
-    setMyBag(myBag.filter(b => b.id !== bookId));
-    showNotification(`"${book.title}" removed from your bag!`, 'info');
+    const book = books.find((b) => b.id === bookId);
+    setMyBag(myBag.filter((b) => b.id !== bookId));
+    showNotification(`"${book.title}" removed from your bag!`, "info");
   };
 
   const borrowBookDirectly = (bookId) => {
-    const book = books.find(b => b.id === bookId);
+    const book = books.find((b) => b.id === bookId);
     if (book && book.available_copies > 0) {
       book.available_copies--;
-      setBorrowedBooks([...borrowedBooks, {...book, borrow_date: new Date()}]);
+      setBorrowedBooks([
+        ...borrowedBooks,
+        { ...book, borrow_date: new Date() },
+      ]);
       showNotification(`"${book.title}" borrowed successfully!`);
       setShowBookModal(false);
     }
   };
 
   const returnBook = (bookId) => {
-    const book = books.find(b => b.id === bookId);
+    const book = books.find((b) => b.id === bookId);
     if (book) {
       book.available_copies++;
-      setBorrowedBooks(borrowedBooks.filter(b => b.id !== bookId));
+      setBorrowedBooks(borrowedBooks.filter((b) => b.id !== bookId));
       showNotification(`"${book.title}" returned successfully!`);
     }
   };
 
   const borrowAllBooks = () => {
-    const availableBooks = myBag.filter(book => book.available_copies > 0);
-    availableBooks.forEach(book => {
+    const availableBooks = myBag.filter((book) => book.available_copies > 0);
+    availableBooks.forEach((book) => {
       book.available_copies--;
-      setBorrowedBooks(prev => [...prev, {...book, borrow_date: new Date()}]);
+      setBorrowedBooks((prev) => [
+        ...prev,
+        { ...book, borrow_date: new Date() },
+      ]);
     });
     setMyBag([]);
     setShowBagModal(false);
@@ -151,13 +199,13 @@ const BookLibraryApp = () => {
 
   const clearBag = () => {
     setMyBag([]);
-    showNotification('Bag cleared!', 'info');
+    showNotification("Bag cleared!", "info");
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setGenreFilter('');
-    setAvailabilityFilter('');
+    setSearchTerm("");
+    setGenreFilter("");
+    setAvailabilityFilter("");
   };
 
   const openBookDetail = (book) => {
@@ -165,8 +213,16 @@ const BookLibraryApp = () => {
     setShowBookModal(true);
   };
 
-  const genres = ['Fiction', 'Science Fiction', 'Non-Fiction', 'Romance', 'Mystery', 'Fantasy', 'Biography', 'History'];
-
+  const genres = [
+    "Fiction",
+    "Science Fiction",
+    "Non-Fiction",
+    "Romance",
+    "Mystery",
+    "Fantasy",
+    "Biography",
+    "History",
+  ];
   return (
     <div
   className="min-h-screen relative overflow-x-hidden"
@@ -480,21 +536,41 @@ const BookLibraryApp = () => {
                 <>
                   <div className="space-y-4 mb-6">
                     {myBag.map(book => (
-                      <div key={book.id} className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                        <div>
-                          <h4 className="font-semibold text-black">{book.title}</h4>
-                          <p className="text-gray-600">by {book.author} • {book.genre}</p>
-                          <p className="text-sm text-gray-500">Available: {book.available_copies}/{book.total_copies} copies</p>
-                        </div>
-                        <button
-                          onClick={() => removeFromBag(book.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center space-x-1"
-                        >
-                          <Minus className="h-4 w-4" />
-                          <span>Remove</span>
-                        </button>
-                      </div>
-                    ))}
+  <div key={book.id} className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
+    <div>
+      <h4 className="font-semibold text-black">{book.title}</h4>
+      <p className="text-gray-600">by {book.author} • {book.genre}</p>
+      <p className="text-sm text-gray-500">
+        Available: {book.available_copies}/{book.total_copies} copies
+      </p>
+    </div>
+
+    <div className="flex space-x-2">
+      {!borrowedBooks.find(b => b.id === book.id) ? (
+        <button
+          onClick={() => borrowBookDirectly(book.id)}
+          className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+        >
+          Borrow
+        </button>
+      ) : (
+        <button
+          onClick={() => returnBook(book.id)}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+        >
+          Return
+        </button>
+      )}
+      <button
+        onClick={() => removeFromBag(book.id)}
+        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+      >
+        Remove
+      </button>
+    </div>
+  </div>
+))}
+
                   </div>
 
                   <div className="flex justify-center space-x-4">
