@@ -14,13 +14,10 @@ export default function LoginForm({ switchPage, onClose }) {
         ✕
       </button>
 
-      <div className="text-center mb-6">
-        <img src="/logo.png" alt="Logo" className="mx-auto h-10 mb-2" />
-        <h2 className="text-xl font-bold">LOGIN</h2>
-        <p className="text-sm text-gray-600">
-          If you have an account with us, please log in.
-        </p>
-      </div>
+      <h2 className="text-2xl font-bold text-center mb-4">LOGIN</h2>
+      <p className="text-sm text-gray-600 text-center mb-6">
+        If you have an account with us, please log in.
+      </p>
 
       <input
         type="email"

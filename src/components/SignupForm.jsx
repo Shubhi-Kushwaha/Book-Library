@@ -16,7 +16,7 @@ export default function SignupForm({ switchPage, onClose }) {
       </button>
 
       <div className="text-center mb-6">
-        <img src="/logo.png" alt="Logo" className="mx-auto h-10 mb-2" />
+        
         <h2 className="text-xl font-bold">CREATE AN ACCOUNT</h2>
         <p className="text-sm text-gray-600">
           Enter your information below to proceed. If you already have an

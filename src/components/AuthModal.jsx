@@ -12,10 +12,8 @@ export default function AuthModal({ page, onClose, switchPage }) {
           ✕
         </button>
 
-        {/* Logo */}
-        <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Logo" className="h-12 w-12" />
-        </div>
+        
+        
 
         {/* Heading */}
         <h2 className="text-2xl font-bold text-center mb-2">

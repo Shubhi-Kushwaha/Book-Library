@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { auth, googleProvider } from "../firebase";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { GoogleIcon, CloseIcon, EyeIcon, CheckIcon } from "../components/Icons";
@@ -11,11 +11,14 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // ✅ New state for admin
 
   const navigate = useNavigate();
 
-  const passwordsMatch = signupPassword.length > 0 && signupPassword === confirmPassword;
-  const passwordsDontMatch = confirmPassword.length > 0 && signupPassword !== confirmPassword;
+  const passwordsMatch =
+    signupPassword.length > 0 && signupPassword === confirmPassword;
+  const passwordsDontMatch =
+    confirmPassword.length > 0 && signupPassword !== confirmPassword;
 
   const handleExit = () => navigate("/");
 
@@ -26,8 +29,8 @@ export default function SignupPage() {
     }
     try {
       await createUserWithEmailAndPassword(auth, signupInput, signupPassword);
-      alert("Signup successful!");
-      navigate("/");
+      alert(`Signup successful as ${isAdmin ? "Admin" : "User"}!`);
+      navigate(isAdmin ? "/admin" : "/");
     } catch (error) {
       alert(error.message);
     }
@@ -36,8 +39,8 @@ export default function SignupPage() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Google signup successful!");
-      navigate("/");
+      alert(`Google signup successful as ${isAdmin ? "Admin" : "User"}!`);
+      navigate(isAdmin ? "/admin" : "/");
     } catch (error) {
       alert(error.message);
     }
@@ -67,13 +70,7 @@ export default function SignupPage() {
               <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-12 flex items-center justify-center">
                 <div className="w-full max-w-md">
                   <div className="text-center">
-                    <div className="mb-4 sm:mb-6">
-                      <img
-                        src="/logo.png"
-                        alt="Logo"
-                        className="mx-auto h-10 sm:h-12 w-auto"
-                      />
-                    </div>
+                    
                     <h2
                       className="text-xl sm:text-2xl font-bold text-gray-900 mb-2"
                       style={{ fontFamily: "serif" }}
@@ -167,6 +164,17 @@ export default function SignupPage() {
                         )}
                       </>
                     )}
+
+                    {/* ✅ Admin checkbox */}
+                    <label className="flex items-center text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={isAdmin}
+                        onChange={() => setIsAdmin(!isAdmin)}
+                        className="mr-2"
+                      />
+                      Signup as Admin
+                    </label>
 
                     <button
                       onClick={handleEmailSignup}
